@@ -19,6 +19,10 @@ class Desenvolvedora(models.Model):
     def __str__(self):
         return self.nome
 
+class JogoManager(models.Manager): #gerenciador de objetos do modelo do jogo
+    
+    def disponiveis(self):
+        return self.filter(estoque__gt=0, is_excluido=False) #retorna apenas os jogos que estão disponíveis (estoque maior que 0 e não excluídos)
 
 class Jogo(models.Model):
     titulo = models.CharField(max_length=200)
@@ -46,8 +50,9 @@ class Jogo(models.Model):
     # O Django cria a tabela loja_jogo_generos sozinho.
     generos = models.ManyToManyField(Genero, related_name="jogos")
 
+    objects = JogoManager() #associa o gerenciador de objetos ao modelo do jogo
     def __str__(self):
-        return self.titulo
+        return self.titulo #retorna o titulo do jogo como representação do objeto
 
 
 class PerfilCliente(models.Model):  # classe para armazenar informações adicionais do cliente
