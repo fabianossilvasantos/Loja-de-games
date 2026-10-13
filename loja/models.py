@@ -20,9 +20,18 @@ class Desenvolvedora(models.Model):
         return self.nome
 
 class JogoManager(models.Manager): #gerenciador de objetos do modelo do jogo
-    
+    # Padrao Factory: a regra "jogo a venda" mora aqui, num lugar so.
+    # Sem isso, o filtro seria copiado no catalogo, no estoque, na busca,
+    # no admin - e no dia em que a regra mudasse, esquecer uma copia faria
+    # o site dizer "esgotado" enquanto a compra ainda seria aceita.
+
     def disponiveis(self):
-        return self.filter(estoque__gt=0, is_excluido=False) #retorna apenas os jogos que estão disponíveis (estoque maior que 0 e não excluídos)
+        # Duas condicoes, duas perguntas diferentes:
+        #   estoque > 0  -> a loja TEM o que vender  (fato do deposito)
+        #   ativo = True -> a loja QUER vender        (decisao comercial)
+        # Faltando qualquer uma, o jogo sai da vitrine - mas por motivos
+        # distintos, que continuam distinguiveis depois.
+        return self.filter(estoque__gt=0, ativo=True)
 
 class Jogo(models.Model):
     titulo = models.CharField(max_length=200)
@@ -33,9 +42,15 @@ class Jogo(models.Model):
 
     estoque = models.PositiveIntegerField(default=0)
 
-    # soft delete: o jogo some da vitrine mas continua no banco,
-    # senao os pedidos antigos que o contem ficam quebrados
-    is_excluido = models.BooleanField(default=False)
+    # Soft delete: o jogo some da vitrine mas continua no banco. Apagar de
+    # verdade quebraria os pedidos antigos que apontam para ele - o cliente
+    # abriria "meus pedidos" e veria um item sem nome.
+    #
+    # Nomeado na forma POSITIVA (ativo, nao is_excluido) de proposito: no
+    # admin, booleano vira icone verde para True e vermelho para False. Com
+    # o nome negativo, o estado normal aparecia em vermelho e o problema em
+    # verde - e as cores contradiziam o significado.
+    ativo = models.BooleanField(default=True)
 
     # PROTECT: apagar a desenvolvedora e recusado enquanto ela
     # tiver jogos. Jogo e mercadoria, nao pode sumir por acidente.

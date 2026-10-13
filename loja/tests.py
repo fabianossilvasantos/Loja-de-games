@@ -58,7 +58,7 @@ class ManagerDisponiveisTest(TestCase):
         Jogo.objects.create(titulo="A venda", estoque=5, **comum)
         Jogo.objects.create(titulo="Sem estoque", estoque=0, **comum)
         Jogo.objects.create(
-            titulo="Excluido", estoque=5, is_excluido=True, **comum
+            titulo="Inativo", estoque=5, ativo=False, **comum
         )
 
     def test_disponiveis_filtra_os_dois_motivos(self):

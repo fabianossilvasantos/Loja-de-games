@@ -9,8 +9,8 @@ class ItemPedidoInline(admin.TabularInline):
 
 @admin.register(Jogo)
 class JogoAdmin(admin.ModelAdmin):
-    list_display = ("titulo", "desenvolvedora", "preco", "estoque", "is_excluido") #  classifica as colunas que aparecem na listagem de jogos no admin
-    list_filter = ("desenvolvedora", "generos", "is_excluido")
+    list_display = ("titulo", "desenvolvedora", "preco", "estoque", "ativo") #  classifica as colunas que aparecem na listagem de jogos no admin
+    list_filter = ("desenvolvedora", "generos", "ativo")
     search_fields = ("titulo",)
     filter_horizontal = ("generos",)
 
