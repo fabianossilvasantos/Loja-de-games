@@ -15,14 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path          # ← include entra aqui
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+urlpatterns = [ #configura a url raiz do projeto, aqui que o django começa a procurar as urls.
+    path('admin/', admin.site.urls), # url padrão do admin do django.
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"), #url para obter o token.
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), #url para atualizar o token.
+    path("api/", include("loja.urls")), #aqui vai chamar tudo que estiver dentro do arquivo urls.py do app loja.
 ]
