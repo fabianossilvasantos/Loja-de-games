@@ -107,6 +107,14 @@ class Pedido(models.Model):
     def __str__(self):
         return f"Pedido {self.id} - {self.cliente.username} - {self.status}"
 
+    def itens_sem_estoque(self):
+        # Mercado: so paga se houver estoque para TODOS os itens.
+        # Devolve os itens cujo jogo nao tem estoque suficiente agora.
+        return [
+            item for item in self.itens.select_related("jogo")
+            if item.quantidade > item.jogo.estoque
+        ]
+
 
 class ItemPedido(models.Model):
     # CASCADE: item nao existe sem o pedido

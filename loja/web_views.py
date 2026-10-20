@@ -103,6 +103,15 @@ def pedido_mudar_status(request, pk):
     permitidos = TRANSICOES.get(pedido.status, [])
 
     if request.method == "POST" and novo in permitidos:
+        # Mercado: nao deixa pagar sem estoque (mesma regra da API).
+        faltando = pedido.itens_sem_estoque() if novo == Pedido.Status.PAGO else []
+        if faltando:
+            nomes = ", ".join(
+                f"{i.jogo} (tem {i.jogo.estoque}, pediu {i.quantidade})" for i in faltando
+            )
+            messages.error(request, f"Não dá para pagar: estoque insuficiente — {nomes}.")
+            return redirect("web:pedido_detail", pk=pedido.pk)
+
         anterior = pedido.status
         pedido.status = novo
         pedido.save()  # <-- aqui o signal dispara: baixa ou devolve o estoque
