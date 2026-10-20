@@ -75,6 +75,13 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+# Interface grafica (login de SESSAO, nao JWT).
+# LOGIN_URL: para onde o @login_required manda quem nao esta logado.
+# Os *_REDIRECT_URL: para onde ir depois de entrar / sair.
+LOGIN_URL = "web:login"
+LOGIN_REDIRECT_URL = "web:jogo_list"
+LOGOUT_REDIRECT_URL = "web:jogo_list"
+
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
