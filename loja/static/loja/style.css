@@ -1,0 +1,239 @@
+/* Interface da Loja de Games - tema escuro.
+   As cores ficam em variaveis no :root para mudar o visual num lugar so. */
+:root {
+  --fundo: #0f1117;
+  --fundo-card: #1a1d27;
+  --fundo-card-topo: #21252f;
+  --borda: #2b2f3a;
+  --texto: #e7e9ee;
+  --texto-fraco: #9aa0ad;
+  --destaque: #7c5cff;
+  --destaque-claro: #a48bff;
+  --ok: #3ad29f;
+  --fora: #ff6b6b;
+  --preco: #ffd166;
+  --sombra: 0 6px 20px rgba(0, 0, 0, .35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---------- topo / navegacao ---------- */
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(15, 17, 23, .9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--borda);
+}
+.topo-conteudo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+}
+.marca { font-size: 1.25rem; font-weight: 700; letter-spacing: .3px; }
+.nav { display: flex; align-items: center; gap: 18px; }
+.nav a:hover { color: var(--destaque-claro); }
+.usuario { color: var(--texto-fraco); font-size: .9rem; }
+.btn-nav {
+  padding: 7px 16px;
+  border: 1px solid var(--destaque);
+  border-radius: 8px;
+  color: var(--destaque-claro);
+}
+.btn-nav:hover { background: var(--destaque); color: #fff; }
+.form-inline { margin: 0; display: inline; }
+.btn-link {
+  background: none; border: none; cursor: pointer;
+  color: var(--texto-fraco); font: inherit; padding: 0;
+}
+.btn-link:hover { color: var(--fora); }
+
+/* ---------- conteudo ---------- */
+.conteudo { padding: 32px 16px 56px; }
+.titulo-pagina { font-size: 1.8rem; margin: 0 0 4px; }
+.subtitulo { color: var(--texto-fraco); margin: 0 0 28px; }
+.sub { font-size: 1.2rem; margin: 32px 0 12px; }
+.voltar { color: var(--texto-fraco); display: inline-block; margin-bottom: 18px; }
+.voltar:hover { color: var(--destaque-claro); }
+.vazio { color: var(--texto-fraco); text-align: center; padding: 32px; }
+
+/* ---------- grade de jogos ---------- */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--destaque);
+  box-shadow: var(--sombra);
+}
+.card-inativo { opacity: .55; }
+.card-link { display: block; height: 100%; }
+.card-topo {
+  background: var(--fundo-card-topo);
+  padding: 16px;
+  border-bottom: 1px solid var(--borda);
+}
+.card-titulo { font-size: 1.1rem; margin: 0 0 4px; }
+.dev { color: var(--texto-fraco); font-size: .85rem; }
+.generos { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 16px 0; }
+.tag {
+  font-size: .72rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, .15);
+  color: var(--destaque-claro);
+  border: 1px solid rgba(124, 92, 255, .35);
+}
+.card-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+.preco { color: var(--preco); font-weight: 700; font-size: 1.1rem; }
+.estoque { font-size: .8rem; }
+.estoque.ok { color: var(--ok); }
+.estoque.fora { color: var(--fora); }
+
+/* ---------- detalhe (ficha) ---------- */
+.detalhe {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 28px;
+}
+.ficha { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin: 22px 0 0; }
+.ficha dt { color: var(--texto-fraco); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+.ficha dd { margin: 4px 0 0; font-size: 1.05rem; }
+
+/* ---------- tabelas ---------- */
+.tabela { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.tabela th, .tabela td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--borda); }
+.tabela thead th { color: var(--texto-fraco); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+.tabela tbody tr:hover { background: rgba(124, 92, 255, .06); }
+.tabela .num { text-align: right; }
+.tabela tfoot td { border-top: 2px solid var(--borda); border-bottom: none; }
+.link-ver:hover { color: var(--destaque-claro); }
+
+/* selos de status do pedido */
+.selo { padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+.selo-aguardando { background: rgba(255, 209, 102, .15); color: var(--preco); }
+.selo-pago { background: rgba(58, 210, 159, .15); color: var(--ok); }
+.selo-enviado { background: rgba(124, 92, 255, .18); color: var(--destaque-claro); }
+.selo-cancelado { background: rgba(255, 107, 107, .15); color: var(--fora); }
+
+/* ---------- login ---------- */
+.login-caixa {
+  max-width: 380px;
+  margin: 24px auto;
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 28px;
+}
+.form { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+.form label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; color: var(--texto-fraco); }
+.form input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--fundo);
+  color: var(--texto);
+  font-size: 1rem;
+}
+.form input:focus { outline: none; border-color: var(--destaque); }
+.btn {
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: var(--destaque);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: var(--destaque-claro); }
+.erro {
+  background: rgba(255, 107, 107, .12);
+  border: 1px solid rgba(255, 107, 107, .4);
+  color: var(--fora);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: .9rem;
+}
+
+/* ---------- rodape ---------- */
+.rodape {
+  border-top: 1px solid var(--borda);
+  padding: 20px 0;
+  color: var(--texto-fraco);
+  font-size: .82rem;
+  text-align: center;
+}
+
+/* ---------- acoes de status (demo do signal) ---------- */
+.acoes { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--borda); }
+.dica { color: var(--texto-fraco); font-size: .9rem; margin: 0 0 14px; }
+.acoes-form { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-acao {
+  padding: 10px 18px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--fundo-card-topo);
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .1s ease, filter .1s ease;
+}
+.btn-acao:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.btn-pago { border-color: var(--ok); color: var(--ok); }
+.btn-enviado { border-color: var(--destaque); color: var(--destaque-claro); }
+.btn-cancelado { border-color: var(--fora); color: var(--fora); }
+
+/* mensagens flash (resultado da acao) */
+.mensagens { list-style: none; padding: 0; margin: 0 0 22px; display: flex; flex-direction: column; gap: 10px; }
+.msg {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: .92rem;
+  border: 1px solid var(--borda);
+  background: var(--fundo-card);
+}
+.msg.success { border-color: rgba(58, 210, 159, .45); background: rgba(58, 210, 159, .10); color: var(--ok); }
+
+/* ---------- responsivo ---------- */
+@media (max-width: 560px) {
+  .nav { gap: 12px; font-size: .9rem; }
+  .marca { font-size: 1.05rem; }
+  .titulo-pagina { font-size: 1.5rem; }
+}

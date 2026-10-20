@@ -1,0 +1,39 @@
+{% extends "loja/base.html" %}
+{% block titulo %}Catálogo · Loja de Games{% endblock %}
+
+{% block conteudo %}
+<h1 class="titulo-pagina">Catálogo</h1>
+<p class="subtitulo">{{ jogos|length }} jogo{{ jogos|length|pluralize }} no acervo</p>
+
+<div class="grade">
+  {% for jogo in jogos %}
+    <article class="card {% if not jogo.ativo %}card-inativo{% endif %}">
+      <a class="card-link" href="{% url 'web:jogo_detail' jogo.pk %}">
+        <div class="card-topo">
+          <h2 class="card-titulo">{{ jogo.titulo }}</h2>
+          <span class="dev">{{ jogo.desenvolvedora.nome }}</span>
+        </div>
+
+        <div class="generos">
+          {% for genero in jogo.generos.all %}
+            <span class="tag">{{ genero.nome }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="card-rodape">
+          <span class="preco">R$ {{ jogo.preco }}</span>
+          {% if jogo.ativo and jogo.estoque > 0 %}
+            <span class="estoque ok">{{ jogo.estoque }} em estoque</span>
+          {% elif not jogo.ativo %}
+            <span class="estoque fora">inativo</span>
+          {% else %}
+            <span class="estoque fora">esgotado</span>
+          {% endif %}
+        </div>
+      </a>
+    </article>
+  {% empty %}
+    <p class="vazio">Nenhum jogo cadastrado ainda.</p>
+  {% endfor %}
+</div>
+{% endblock %}

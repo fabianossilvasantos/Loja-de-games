@@ -1,0 +1,70 @@
+{% extends "loja/base.html" %}
+{% block titulo %}Pedido {{ pedido.id }} · Loja de Games{% endblock %}
+
+{% block conteudo %}
+<a class="voltar" href="{% url 'web:pedido_list' %}">← voltar aos pedidos</a>
+
+<article class="detalhe">
+  <h1 class="titulo-pagina">Pedido #{{ pedido.id }}</h1>
+
+  <dl class="ficha">
+    <div>
+      <dt>Cliente</dt>
+      <dd>{{ pedido.cliente.username }}</dd>
+    </div>
+    <div>
+      <dt>Status</dt>
+      <dd><span class="selo selo-{{ pedido.status }}">{{ pedido.get_status_display }}</span></dd>
+    </div>
+    <div>
+      <dt>Criado em</dt>
+      <dd>{{ pedido.criado_em|date:"d/m/Y H:i" }}</dd>
+    </div>
+  </dl>
+
+  <h2 class="sub">Itens</h2>
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Jogo</th>
+        <th class="num">Estoque atual</th>
+        <th class="num">Qtd.</th>
+        <th class="num">Preço praticado</th>
+        <th class="num">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens %}
+        <tr>
+          <td>{{ item.jogo.titulo }}</td>
+          <td class="num">{{ item.jogo.estoque }}</td>
+          <td class="num">{{ item.quantidade }}</td>
+          <td class="num">R$ {{ item.preco_praticado }}</td>
+          <td class="num">R$ {{ item.subtotal }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" class="num"><strong>Total</strong></td>
+        <td class="num"><strong>R$ {{ total }}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  {% if transicoes %}
+    <div class="acoes">
+      <h2 class="sub">Mudar status</h2>
+      <p class="dica">Clique e observe a coluna <strong>Estoque atual</strong> acima: o signal age ao salvar.</p>
+      <form method="post" action="{% url 'web:pedido_mudar_status' pedido.pk %}" class="acoes-form">
+        {% csrf_token %}
+        {% for valor, rotulo in transicoes %}
+          <button type="submit" name="status" value="{{ valor }}" class="btn-acao btn-{{ valor }}">{{ rotulo }}</button>
+        {% endfor %}
+      </form>
+    </div>
+  {% else %}
+    <p class="dica">Pedido cancelado — sem mais transições.</p>
+  {% endif %}
+</article>
+{% endblock %}

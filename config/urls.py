@@ -26,4 +26,5 @@ urlpatterns = [ #configura a url raiz do projeto, aqui que o django começa a pr
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"), #url para obter o token.
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), #url para atualizar o token.
     path("api/", include("loja.urls")), #aqui vai chamar tudo que estiver dentro do arquivo urls.py do app loja.
+    path("loja/", include("loja.web_urls")), #interface grafica (HTML) - separada da API.
 ]

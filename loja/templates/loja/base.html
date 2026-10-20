@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Loja de Games{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'loja/style.css' %}">
+</head>
+<body>
+  <header class="topo">
+    <div class="container topo-conteudo">
+      <a class="marca" href="{% url 'web:jogo_list' %}">🎮 Loja de Games</a>
+      <nav class="nav">
+        <a href="{% url 'web:jogo_list' %}">Catálogo</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'web:pedido_list' %}">Pedidos</a>
+          <span class="usuario">{{ user.username }}</span>
+          {# logout no Django 6 exige POST, por isso um formulario e nao um link #}
+          <form action="{% url 'web:logout' %}" method="post" class="form-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn-link">Sair</button>
+          </form>
+        {% else %}
+          <a class="btn-nav" href="{% url 'web:login' %}">Entrar</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container conteudo">
+    {% if messages %}
+      <ul class="mensagens">
+        {% for m in messages %}
+          <li class="msg {{ m.tags }}">{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      IFRS · Desenvolvimento de Sistemas I — interface gráfica consumindo os mesmos models da API
+    </div>
+  </footer>
+</body>
+</html>

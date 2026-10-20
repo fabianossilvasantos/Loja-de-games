@@ -1,0 +1,43 @@
+{% extends "loja/base.html" %}
+{% block titulo %}{{ jogo.titulo }} · Loja de Games{% endblock %}
+
+{% block conteudo %}
+<a class="voltar" href="{% url 'web:jogo_list' %}">← voltar ao catálogo</a>
+
+<article class="detalhe">
+  <h1 class="titulo-pagina">{{ jogo.titulo }}</h1>
+
+  <div class="generos">
+    {% for genero in jogo.generos.all %}
+      <span class="tag">{{ genero.nome }}</span>
+    {% endfor %}
+  </div>
+
+  <dl class="ficha">
+    <div>
+      <dt>Preço</dt>
+      <dd class="preco">R$ {{ jogo.preco }}</dd>
+    </div>
+    <div>
+      <dt>Estoque</dt>
+      <dd>{{ jogo.estoque }} unidade{{ jogo.estoque|pluralize }}</dd>
+    </div>
+    <div>
+      <dt>Situação</dt>
+      <dd>
+        {% if jogo.ativo and jogo.estoque > 0 %}
+          <span class="estoque ok">à venda</span>
+        {% elif not jogo.ativo %}
+          <span class="estoque fora">inativo</span>
+        {% else %}
+          <span class="estoque fora">esgotado</span>
+        {% endif %}
+      </dd>
+    </div>
+    <div>
+      <dt>Desenvolvedora</dt>
+      <dd>{{ jogo.desenvolvedora.nome }} · {{ jogo.desenvolvedora.pais }} · desde {{ jogo.desenvolvedora.ano_fundacao }}</dd>
+    </div>
+  </dl>
+</article>
+{% endblock %}
