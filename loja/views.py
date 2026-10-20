@@ -54,3 +54,14 @@ class PedidoViewSet(viewsets.ModelViewSet): # ModelViewSet é uma classe que já
     queryset = Pedido.objects.select_related("cliente").prefetch_related("itens__jogo")
     serializer_class = PedidoSerializer
     permission_classes = [IsAuthenticated] # só usuários logados veem pedidos
+    
+    def perform_create(self, serializer):
+        # Mercado: o dono e sempre que esta logado(nunca do corpo da requisição )
+        # Os medidos iniciam como aguardado e paga um por vez
+        
+        serializer.save(
+            cliente=self.request.user,
+            status=Pedido.Status.AGUARDANDO,
+        )
+    
+    
