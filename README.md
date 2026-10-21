@@ -232,6 +232,28 @@ e um `GET` na mesma rota continua devolvendo `200`.
 | `PATCH` | `/api/pedidos/{id}/` | Atualiza campos específicos |
 | `DELETE` | `/api/pedidos/{id}/` | Remove o pedido e seus itens |
 
+**Criar um pedido**
+
+O cliente manda apenas os itens (jogo e quantidade). O servidor define o dono (o usuário
+autenticado), cria o pedido como `aguardando` e **congela o preço** de cada item com o preço
+atual do jogo. Jogo inativo é recusado com `400`.
+
+```http
+POST /api/pedidos/
+Authorization: Bearer <access>
+Content-Type: application/json
+
+{
+  "itens_entrada": [
+    { "jogo": 7, "quantidade": 2 },
+    { "jogo": 5, "quantidade": 1 }
+  ]
+}
+```
+
+Devolve `201` com o pedido no mesmo formato do `GET` — o `preco_praticado` de cada item vem
+preenchido pelo servidor, não pelo cliente.
+
 **Detalhar um pedido**
 
 Os itens vêm aninhados, com o título do jogo e o preço praticado na compra.
@@ -257,6 +279,10 @@ Authorization: Bearer <access>
 
 Os valores possíveis de `status` são `aguardando`, `pago`, `enviado` e `cancelado`.
 Alterá-lo tem efeito sobre o estoque — veja [Regras de negócio](#regras-de-negócio).
+
+**Pagamento e estoque.** Mudar o status para `pago` (via `PATCH`) baixa o estoque pelo
+signal. Se faltar estoque para algum item, o pagamento é **recusado com `400`** e o status
+não muda.
 
 ### Consultas agregadas
 
@@ -300,6 +326,23 @@ Qualquer rota sob `/api/`, exceto as de token, devolve `401` sem o cabeçalho:
 { "detail": "As credenciais de autenticação não foram fornecidas." }
 ```
 
+## Interface web
+
+Além da API, há uma interface gráfica renderizada pelo servidor (Django templates), sob o
+prefixo `/loja/`:
+
+| Rota | Descrição |
+| --- | --- |
+| `/loja/` | Catálogo de jogos (público) |
+| `/loja/jogos/{id}/` | Detalhe de um jogo |
+| `/loja/pedidos/` | Lista de pedidos (exige login) |
+| `/loja/pedidos/{id}/` | Detalhe do pedido, com mudança de status |
+| `/loja/login/` · `/loja/logout/` | Entrar e sair (sessão) |
+
+Ao contrário da API (que usa JWT), a interface usa **login de sessão** do Django. Mudar o
+status de um pedido pela tela dispara o mesmo signal de estoque — e também recusa o
+pagamento sem estoque.
+
 ## Regras de negócio
 
 **Baixa de estoque no pagamento.** Um signal observa o `Pedido`. Quando o status muda para
@@ -318,6 +361,13 @@ vezes.
 jogos com `estoque > 0` **e** `ativo = True`. São condições distintas: estoque é fato do
 depósito, `ativo` é decisão comercial.
 
+**Criação de pedido (padrão de mercado).** Na API, o dono do pedido é sempre o usuário
+autenticado — nunca vem no corpo da requisição —, o pedido nasce `aguardando`, e o
+`preco_praticado` é copiado do jogo pelo servidor (o cliente não dita o preço). Jogo inativo
+não entra no pedido, e o pagamento só é aceito se houver estoque para todos os itens. Essa
+regra de estoque fica num único método (`Pedido.itens_sem_estoque()`), reaproveitado pela API
+e pela interface.
+
 ## Evidências
 
 A pasta [`evidencias/`](evidencias/) traz a coleção do Postman com os fluxos da API,
@@ -333,8 +383,9 @@ cole na aba **Authorization** da coleção, como *Bearer Token*.
 python manage.py test loja
 ```
 
-Quatro testes cobrem o signal de estoque e o Manager de disponibilidade. Eles rodam
-automaticamente a cada pull request, pelo workflow em
+Os testes cobrem o signal de estoque, o Manager de disponibilidade e as regras de mercado do
+pedido (dono, preço no servidor, jogo inativo e validação de estoque no pagamento). Eles
+rodam automaticamente a cada pull request, pelo workflow em
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml), junto com `manage.py check` e a
 verificação de migrations pendentes.
 
@@ -354,6 +405,10 @@ Loja-de-games/
 │   ├── serializers.py       # tradução model ↔ JSON, com aninhamento
 │   ├── views.py             # ViewSets, permissões e consultas agregadas
 │   ├── urls.py              # Router do DRF
+│   ├── web_views.py         # views da interface web (HTML)
+│   ├── web_urls.py          # rotas da interface web
+│   ├── templates/loja/      # páginas HTML da interface
+│   ├── static/loja/         # CSS da interface
 │   ├── signals.py           # baixa e devolução de estoque
 │   ├── admin.py
 │   ├── tests.py
@@ -372,10 +427,9 @@ As mensagens de commit seguem o padrão Conventional Commits, documentado em
 
 ## Limitações conhecidas
 
-- **Sem validação de estoque na venda.** É possível registrar um pedido com quantidade
-  maior que o estoque disponível, e vender um jogo marcado como inativo.
-- **`preco_praticado` é informado manualmente.** O valor não é copiado automaticamente do
-  jogo no momento da criação do item.
+- **Estoque e preço só são garantidos pela API.** Ao criar pedido pela API, o servidor
+  congela o preço e recusa pagamento sem estoque. Pelo admin/ORM, o `preco_praticado` ainda
+  é digitado à mão e não há validação de estoque.
 - **Permissão de acesso é por autenticação, não por dono.** Qualquer usuário autenticado
   acessa todos os pedidos, inclusive os de outros clientes.
 - **Sem paginação.** As listagens devolvem todos os registros de uma vez.
