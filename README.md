@@ -50,6 +50,51 @@ Crie um superusuário — necessário para obter o token e para acessar o admin:
 python manage.py createsuperuser
 ```
 
+### Usuários iniciais (opcional)
+
+Em vez do `createsuperuser`, o comando `criar_usuarios` cadastra 10 usuários de uma vez:
+os administradores `fabiano` e `pamela` e 8 compradores **fictícios** (dados de exemplo,
+com e-mail `@example.com`), cada comprador com seu `PerfilCliente`.
+
+Nenhuma senha fica no código. Cada grupo tem a sua variável de ambiente, e as duas precisam
+ser diferentes: `LOJA_SENHA_ADMINS` e `LOJA_SENHA_CLIENTES`. **Não escreva a senha na linha
+de comando**, porque o terminal guarda tudo o que é digitado no histórico. Peça a senha sem
+mostrá-la na tela e apague a variável no fim:
+
+```powershell
+# Windows (PowerShell)
+$s = Read-Host "Senha dos admins" -AsSecureString
+$env:LOJA_SENHA_ADMINS = [System.Net.NetworkCredential]::new("", $s).Password
+$s = Read-Host "Senha dos compradores" -AsSecureString
+$env:LOJA_SENHA_CLIENTES = [System.Net.NetworkCredential]::new("", $s).Password
+python manage.py criar_usuarios
+Remove-Item Env:LOJA_SENHA_ADMINS, Env:LOJA_SENHA_CLIENTES
+```
+
+```bash
+# Linux / macOS
+read -rsp "Senha dos admins: " LOJA_SENHA_ADMINS; echo
+read -rsp "Senha dos compradores: " LOJA_SENHA_CLIENTES; echo
+export LOJA_SENHA_ADMINS LOJA_SENHA_CLIENTES
+python manage.py criar_usuarios
+unset LOJA_SENHA_ADMINS LOJA_SENHA_CLIENTES
+```
+
+- Sem a variável de um grupo, cada usuário dele recebe uma senha aleatória, mostrada **uma
+  única vez**. Ela sai na saída padrão: se a saída for redirecionada para um arquivo ou
+  ficar num log (de CI, por exemplo), a senha fica gravada lá. Guarde esse arquivo com
+  cuidado e apague-o depois de anotar as senhas.
+- Senha fraca, vazia, com espaço no começo ou no fim, ou parecida com o nome do usuário é
+  recusada antes de gravar qualquer coisa.
+- Pode rodar de novo: quem já existe não é duplicado nem tem a senha trocada. Para trocar a
+  senha de alguém, use `python manage.py changepassword <usuario>`.
+- Se já existir um `fabiano` ou `pamela` que não é admin, o comando avisa, não o promove e
+  termina com erro (os demais usuários são gravados). Para promover, use
+  `python manage.py criar_usuarios --promover-existentes`.
+- Contas repetidas que só diferem nas maiúsculas (`Fabiano` e `FABIANO`) são puladas com
+  aviso, e compradores que já existiam inativos ou com acesso de admin também geram aviso.
+  No fim, um resumo mostra quantos foram criados, já existiam, promovidos e ignorados.
+
 Rode o servidor:
 
 ```bash
@@ -384,7 +429,8 @@ python manage.py test loja
 ```
 
 Os testes cobrem o signal de estoque, o Manager de disponibilidade e as regras de mercado do
-pedido (dono, preço no servidor, jogo inativo e validação de estoque no pagamento). Eles
+pedido (dono, preço no servidor, jogo inativo e validação de estoque no pagamento), além do
+comando `criar_usuarios` (`loja/tests_usuarios.py`). Eles
 rodam automaticamente a cada pull request, pelo workflow em
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml), junto com `manage.py check` e a
 verificação de migrations pendentes.
@@ -410,8 +456,10 @@ Loja-de-games/
 │   ├── templates/loja/      # páginas HTML da interface
 │   ├── static/loja/         # CSS da interface
 │   ├── signals.py           # baixa e devolução de estoque
+│   ├── management/commands/ # comando criar_usuarios
 │   ├── admin.py
 │   ├── tests.py
+│   ├── tests_usuarios.py    # testes do criar_usuarios
 │   └── migrations/
 ├── evidencias/              # coleção do Postman
 ├── manage.py
