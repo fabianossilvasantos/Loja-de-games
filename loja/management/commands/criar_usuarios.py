@@ -71,11 +71,21 @@ class Command(BaseCommand):
             action="store_true",
             help="Torna admin um 'fabiano' ou 'pamela' que ja exista sem ser admin.",
         )
+        parser.add_argument(
+            "--demo",
+            action="store_true",
+            help="Usa senhas de testes fixas (@admin123 / Cliente#2026), iguais em qualquer maquina"
+        )
 
     def handle(self, *args, **options):
         # 1. Le e valida as senhas ANTES de gravar qualquer coisa.
         senha_admins = self.ler_senha(VARIAVEL_ADMINS, ADMINS)
         senha_clientes = self.ler_senha(VARIAVEL_CLIENTES, COMPRADORES)
+        # --demo: senhas de teste deterministicas (iguais em qualquer maquina).
+        # Admins usam @admin123; cada cliente recebe username1#2026, username2#2026,
+        # ... (a numeracao e feita no laco dos compradores, mais abaixo).
+        if options["demo"]:
+            senha_admins = senha_admins or "@admin123"
         if senha_admins and senha_admins == senha_clientes:
             raise CommandError(
                 f"{VARIAVEL_ADMINS} e {VARIAVEL_CLIENTES} sao iguais. Use senhas "
@@ -92,8 +102,13 @@ class Command(BaseCommand):
         with transaction.atomic():
             for dados in ADMINS:
                 self.criar(dados, True, senha_admins, options)
-            for dados in COMPRADORES:
-                self.criar(dados, False, senha_clientes, options)
+            for i, dados in enumerate(COMPRADORES, start=1):
+                senha = senha_clientes
+                # --demo sem variavel de ambiente: cada cliente tem senha propria
+                # (username1#2026, ...), deterministica e igual em qualquer maquina.
+                if options["demo"] and not os.environ.get(VARIAVEL_CLIENTES):
+                    senha = f"username{i}#2026"
+                self.criar(dados, False, senha, options)
 
         # 3. Banco gravado: agora sim mostra o que aconteceu.
         for texto, e_aviso in self.mensagens:
